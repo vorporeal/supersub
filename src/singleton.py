@@ -10,6 +10,3 @@ class Singleton(object):
     if classtype != type(classtype.__single):
       classtype.__single = object.__new__(classtype, *args, **kwargs)
     return classtype.__single
-
-  def __init__(self,name=None):
-    self.name = name

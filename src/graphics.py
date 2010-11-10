@@ -9,8 +9,6 @@ class Graphics(Singleton):
     def __init__(self):
         # Set the caption for the display
         pg.display.set_caption('Super Sub')
-        # Define the variable for the screen.
-        self.screen = None
     
     # Set the resolution of the window.
     # res = (width, height)
@@ -24,4 +22,4 @@ class Graphics(Singleton):
     
     # Flip the back-buffers, pushing all changes to the screen.
     def flip(self):
-        pg.display.flip()
+        pg.display.update()
