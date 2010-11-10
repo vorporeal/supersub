@@ -1,5 +1,5 @@
-.komodoproject
+*.komodoproject
 komodo/
 
-.pyc
-.pyo
+*.pyc
+*.pyo
