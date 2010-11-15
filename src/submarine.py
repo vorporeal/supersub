@@ -5,7 +5,7 @@ import numpy as np
 import pygame as pg
 from pygame.locals import *
 
-class Sub():
+class Sub(object):
     # pos is a 2-element numpy array storing the position of the sub
     #   as a vector.
     def __init__(self, pos):
