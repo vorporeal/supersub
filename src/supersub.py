@@ -8,6 +8,8 @@ import numpy as np
 from graphics import *
 from submarine import *
 from input import *
+from map import *
+from line import *
 
 def start():
     # Initialize pygame
@@ -32,7 +34,12 @@ def start():
     fps_text = None
     
     # Create a font with which to blit text to the screen.
-    font = pg.font.Font(pg.font.get_default_font(), 12)
+    font = pg.font.Font(pg.font.match_font('dejavusans'), 12)
+    
+    # Create a map, and add a line to it.
+    map = Map()
+    map.lines.append(Line(np.array([50, 0]), np.array([0, 50])))
+    map.lines.append(Line(np.array([750, 800]), np.array([800, 750])))
     
     # A simple event loop.
     while not i.quit:
@@ -53,10 +60,18 @@ def start():
         # Move the submarine based on the input.
         sub.move(move_vec)
         
+        # Update the map with the new player position.
+        map.update(sub)
+        
         # Clear the screen.
         g.clear()
-        # Draw the sub.
-        sub.draw()
+        
+        # Draw the map.
+        map.draw()
+        
+        # Calculate the sub's offset, and draw it.
+        sub_offset = -1 * np.array(map.draw_rect.topleft)
+        sub.draw(sub_offset)
         
         # Update fps_text if it's been 12 ticks since the last update.
         if fps_counter == 0:

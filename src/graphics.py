@@ -2,6 +2,7 @@
 
 from singleton import *
 
+import numpy as np
 import pygame as pg
 from pygame.locals import *
 
@@ -15,6 +16,8 @@ class Graphics(Singleton):
     def set_res(self, res):
         # Create a screen with the specified resolution.
         self.screen = pg.display.set_mode(res)
+        self.res = np.array(res)
+        self.hres = self.res / 2
     
     # Clear the screen.
     def clear(self):
