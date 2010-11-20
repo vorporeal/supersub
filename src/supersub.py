@@ -11,19 +11,22 @@ from input import *
 from map import *
 from line import *
 
+WIDTH = 640
+HEIGHT = 480
+
 def start():
     # Initialize pygame
     pg.init()
     
     # Create our graphics manager.
     g = Graphics()
-    g.set_res((640, 480))
+    g.set_res((WIDTH, HEIGHT))
     
     # Create our input handler.
     i = Input()
     
     # Create a sub.
-    sub = Sub(np.array([320, 240], dtype=np.float32))
+    sub = Sub(np.array([WIDTH / 2, HEIGHT / 2], dtype=np.float32))
     
     # Create a Clock with which to synchronize updates.
     clock = pg.time.Clock()
@@ -41,24 +44,35 @@ def start():
     map.lines.append(Line(np.array([50, 0]), np.array([0, 50])))
     map.lines.append(Line(np.array([750, 800]), np.array([800, 750])))
     
+    # Define a variable to store the frame times.
+    time = 0
+    
     # A simple event loop.
     while not i.quit:
         # Make sure the input data is up-to-date.
         i.update()
         
-        move_vec = np.array([0,0], dtype=np.float32)
+        # Get the elapsed time (for calculating movement properly).
+        time = clock.get_time() / 1000.0
+        
+        dir = np.array([0,0], dtype=np.float32)
         
         if K_w in i.keys.pressed:
-            move_vec += np.array([0,-1])
+            dir += np.array([0,-1])
         if K_a in i.keys.pressed:
-            move_vec += np.array([-1,0])
+            dir += np.array([-1,0])
         if K_s in i.keys.pressed:
-            move_vec += np.array([0,1])
+            dir += np.array([0,1])
         if K_d in i.keys.pressed:
-            move_vec += np.array([1,0])
+            dir += np.array([1,0])
         
         # Move the submarine based on the input.
-        sub.move(move_vec)
+        move_vec = sub.move(time, dir)
+        # If the move is invalid, respawn the dead submarine (for now).
+        # TODO: "Kill" the sub, and handle the death (end of match, give a point
+        #       and respawn?).        
+        if map.test_collision(sub):
+            sub.spawn(np.array([WIDTH / 2, HEIGHT / 2]))
         
         # Update the map with the new player position.
         map.update(sub)

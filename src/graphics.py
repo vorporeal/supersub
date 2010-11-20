@@ -15,7 +15,7 @@ class Graphics(Singleton):
     # res = (width, height)
     def set_res(self, res):
         # Create a screen with the specified resolution.
-        self.screen = pg.display.set_mode(res)
+        self.screen = pg.display.set_mode(res, 0, 16)
         self.res = np.array(res)
         self.hres = self.res / 2
     
