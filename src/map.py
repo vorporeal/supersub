@@ -1,74 +1,57 @@
 #!/usr/bin/env python
 
+from math import *
+
 import pygame as pg
+import numpy as np
 
 from graphics import *
 from line import *
 
+axis_dir = [np.array([1, 0]), np.array([0, 1])]
+
+def get_line_span(line, axis):
+    p1 = np.dot(line.p1, axis)
+    p2 = np.dot(line.p2, axis)
+    
+    # Return the min and max span as (min, max).
+    if p1 < p2:
+        return (p1, p2)
+    else:
+        return (p2, p1)
+
+# c == center; r == radius
+def get_rect_span(rect, axis):
+    half_size = np.array(rect.size) / 2.0
+    c = np.dot(np.array(rect.center), axis)
+    xproj = fabs(np.dot(axis, axis_dir[0]))
+    yproj = fabs(np.dot(axis, axis_dir[1]))
+    r = np.dot(np.array((xproj, yproj)), half_size)
+    return (c - r, c + r)
+
+def axis_intersect(rect, line, axis):
+    mins, maxs = get_line_span(line, axis)
+    minr, maxr = get_rect_span(rect, axis)
+    
+    if mins > maxr or maxs < minr:
+        return False
+    else:
+        return True
+
+# TODO: Optimize.  Definitely too slow.
 def line_rect_collision(line, rect):
-    """ Does a collision test between a Line and a pygame.Rect. """
+    dir = line.p2 - line.p1
     
-    xmin, ymin = rect.topleft
-    xmax, ymax = rect.bottomright
+    if not axis_intersect(rect, line, dir):
+        return False
+    if not axis_intersect(rect, line, np.array((-dir[0], dir[1]))):
+        return False
+    if not axis_intersect(rect, line, axis_dir[0]):
+        return False
+    if not axis_intersect(rect, line, axis_dir[1]):
+        return False
     
-    '''
-    if (line.p2[0] - line.p1[0]) == 0:
-        if line.p1[1] <= ymin and line.p2[1] >= ymin:
-            return True
-        elif line.p1[1] > ymin and line.p2[1] <= ymin:
-            return True
-        elif line.p2[1] <= ymin and line.p1[1] >= ymin:
-            return True
-        elif line.p2[1] > ymin and line.p1[1] <= ymin:
-            return True
-        else:
-            return False
-    
-    m = (line.p2[1] - line.p1[1]) / (line.p2[0] - line.p1[0])
-    b = line.p1[1] - m * line.p1[0]
-    
-    for point in [rect.topleft, rect.topright, rect.bottomleft, rect.bottomright]:
-        y = m * point[0] + b
-        if y >= ymin and y <= ymax:
-            return True
-    return False'''
-    
-    '||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||'
-    
-    # Assume the line is vertical.
-    m = None
-    b = line.p1[0]
-    # If not, calculate its slope (we're avoiding div-by-zero).
-    if not line.p2[0] == line.p1[0]:    
-        m = (line.p2[1] - line.p1[1]) / (line.p2[0] - line.p1[0])
-    if not m == None:
-        b = line.p1[1] - m * line.p1[0]
-    
-    # We'll test intersection with the box by testing the locations of
-    # its intersections with the four lines comprising the rect.
-    
-    for point in [rect.topleft, rect.bottomright]:
-        # Do a special test for vertical lines (as m == inf == None).
-        if m == None:
-            if xmin <= line.p1[0] <= xmax:
-                return True
-            else:
-                return False
-        # Test rect's horizontal lines first.
-        y = m * point[0] + b
-        if ymin <= y <= ymax:
-            return True
-        # Do a special test for horizonal lines (to avoid div-by-zero).
-        if m == 0:
-            if ymin <= line.p1[1] <= ymax:
-                return True
-            else:
-                return False
-        # Now test its vertical lines.
-        x = (point[1] - b) / m
-        if xmin <= x <= xmax:
-            return True
-    return False
+    return True
 
 class Map(object):
     """ Holds data about the lines which make up the map. """
@@ -101,19 +84,45 @@ class Map(object):
         line = Line(np.array([sizem[0], 0]), sizem)
         line.color = pg.Color("dark blue")
         self.lines.append(line)
+        
+        # Draw a box in the center.
+        center = self.size / 2
+        #   TOP
+        line = Line(center + np.array([-30, -30]), center + np.array([30, -30]))
+        line.color = pg.Color("dark blue")
+        self.lines.append(line)
+        #   LEFT
+        line = Line(center + np.array([-30, -30]), center + np.array([-30, 30]))
+        line.color = pg.Color("dark blue")
+        self.lines.append(line)
+        #   RIGHT
+        line = Line(center + np.array([30, -30]), center + np.array([30, 30]))
+        line.color = pg.Color("dark blue")
+        self.lines.append(line)
+        #   BOTTOM
+        line = Line(center + np.array([-30, 30]), center + np.array([30, 30]))
+        line.color = pg.Color("dark blue")
+        self.lines.append(line)
     
-    def draw(self):
-        offset = -1 * np.array(self.draw_rect.topleft)
-        self.g.screen.lock()
+    def draw(self, rect=None, surface=None):
+        if rect == None:
+            rect = self.draw_rect
+        if surface == None:
+            surface = self.g.screen
+        offset = -1 * np.array(rect.topleft)
+            
+        # Very simple simple optimization.  Gives a speed-up of up to 80fps
+        # faster than un-optimized version ("if" statement removed) using simple
+        # "borders and corners" map.
+        surface.lock()
         for line in self.lines:
-            #if self.draw_rect.collidepoint(line.p1) or self.draw_rect.collidepoint(line.p2):
-            #if line_rect_collision(line, self.draw_rect):
-            line.draw(offset)
-        self.g.screen.unlock()
+            if line_rect_collision(line, rect):
+                line.draw(offset)
+        surface.unlock()
     
     def update(self, player):
-        # Make sure the map|s not smaller than the window.
-        # NOTE: THIS IS INCORRECT.  It shouldn|t correctly handle maps that are
+        # Make sure the map's not smaller than the window.
+        # NOTE: THIS IS INCORRECT.  It shouldn't correctly handle maps that are
         #       smaller than the window in only one dimension.
         if np.all(self.size < self.g.res):
             return Rect(self.size - self.g.res, self.g.res)
