@@ -18,7 +18,7 @@ class Line(object):
         self.p1 = p1
         self.p2 = p2
     
-    def draw(self, offset):
+    def draw(self, surface, offset):
         """ Draws the line to the screen. """
         
         g = Graphics()
@@ -30,4 +30,4 @@ class Line(object):
         else:
             color = Line.default_color
             
-        pg.draw.line(g.screen, color, np.int32(self.p1 + offset), np.int32(self.p2 + offset), 2)
+        pg.draw.line(surface, color, np.int32(self.p1 + offset), np.int32(self.p2 + offset), 2)

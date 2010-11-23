@@ -117,7 +117,7 @@ class Map(object):
         surface.lock()
         for line in self.lines:
             if line_rect_collision(line, rect):
-                line.draw(offset)
+                line.draw(surface, offset)
         surface.unlock()
     
     def update(self, player):
