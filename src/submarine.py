@@ -14,19 +14,19 @@ class Sub(object):
         # Keep in mind that there are 60 frames in a second (approx), so we up
         # the speed to compensate.
         self.speed *= 60
+        
+        self.pos = np.zeros(2)
         self.spawn(pos)
         
         self.image = pg.image.load("media/submarine.png").convert()
-        self.image.set_colorkey(pg.Color(0xFF00FF00))
-        print('color key: ' + str(self.image.get_colorkey()))
+        self.image.set_colorkey(pg.Color(255, 0, 255))
         self.image_size = np.array(self.image.get_size(), dtype=np.int8)
         self.half_image_size = self.image_size / 2
     
     def spawn(self, pos):
         # Set initial values for the sub.
         self.health = 100
-        
-        self.pos = np.array(pos)
+        self.pos[:] = pos # This does an element-wise copy of pos into self.pos.
     
     # amt is a 2-element numpy translation vector (array)
     def move(self, time, amt):
@@ -48,12 +48,14 @@ class Sub(object):
         
             Given as a list of pygame.Rect objects.
         '''
+        
+        off = self.pos - self.half_image_size
         list = []
         # Top
-        list.append((np.array([12, 6]), (8, 8)))
+        list.append(Rect(np.array([12, 6]) + off, (8, 8)))
         # Scope
-        list.append((np.array([24, 8]), (4, 6)))
+        list.append(Rect(np.array([24, 8]) + off, (4, 6)))
         # Body
-        list.append((np.array([0, 14]), (32, 12)))
+        list.append(Rect(np.array([0, 14]) + off, (32, 12)))
         
-        return [pg.Rect((self.pos - self.half_image_size) + l[0], l[1]) for l in list]
+        return list
