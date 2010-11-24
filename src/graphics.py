@@ -8,8 +8,7 @@ from pygame.locals import *
 
 class Graphics(Singleton):
     def __init__(self):
-        # Set the caption for the display
-        pg.display.set_caption('Super Sub')
+        pass
     
     # Set the resolution of the window.
     # res = (width, height)
