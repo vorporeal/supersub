@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from singleton import *
-
-import numpy as np
 import pygame as pg
 from pygame.locals import *
+
+from singleton import *
+from vec import *
 
 class Graphics(Singleton):
     def __init__(self):
@@ -15,7 +15,7 @@ class Graphics(Singleton):
     def set_res(self, res):
         # Create a screen with the specified resolution.
         self.screen = pg.display.set_mode(res, 0, 16)
-        self.res = np.array(res)
+        self.res = vec2(res)
         self.hres = self.res / 2
     
     # Clear the screen.
