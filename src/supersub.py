@@ -11,7 +11,7 @@ from submarine import *
 from input import *
 from map import *
 from line import *
-#from ping import *
+from ping import *
 
 WIDTH = 840
 HEIGHT = 840
@@ -64,12 +64,12 @@ def start():
         time = clock.get_time() / 1000.0
         
         # Update all pings.
-        #for p in pings:
-        #    p.update(time)
+        for p in pings:
+            p.update(time)
         
         # Create a new Ping if the mouse was clicked.
-        #if 1 in i.mouse.clicked:
-        #    pings.append(Ping(map, i.mouse.pos + vec2(map.draw_rect.topleft)))
+        if 1 in i.mouse.clicked:
+            pings.append(Ping(map, i.mouse.pos + vec2(map.draw_rect.topleft)))
         
         # Create a zero-vector to store the movement direction for the sub.
         dir = vec2(0.0, 0.0, type=np.float32)
@@ -99,17 +99,17 @@ def start():
         g.clear()
         
         # Draw the map.
-        map.draw()
+        #map.draw()
         
         # Calculate the drawing offset.
         offset = -1 * vec2(map.draw_rect.topleft)
         
         # Draw any pings.
-        #for p in pings:
-        #    if p.alpha == 0:
-        #        pings.remove(p)
-        #    else:
-        #        p.draw(offset)
+        for p in pings:
+            if p.alpha == 0:
+                pings.remove(p)
+            else:
+                p.draw(offset)
         
         # Draw the sub.
         sub.draw(offset)
