@@ -6,7 +6,6 @@ import numpy as np
 from vec import *
 from graphics import *
 from line import *
-from quadtree import *
 
 class Map(object):
     """ Holds data about the lines which make up the map. """
