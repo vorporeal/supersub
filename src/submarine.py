@@ -13,13 +13,13 @@ class Sub(object):
     # pos is a 2-element object storing the position of the sub as a vector.
     def __init__(self, pos):
         self.g = Graphics()
-        #self.speed = vec2(0.5, 0.3)
-        self.speed = vec2(2.0, 1.2) # To assist with testing.
+        self.speed = vec2(0.7, 0.3)
+        #self.speed = vec2(2.0, 1.2) # To assist with testing.
         # Keep in mind that there are 60 frames in a second (approx), so we up
         # the speed to compensate.
         self.speed *= 60
         
-        self.pos = vec2(0, 0)
+        self.pos = vec2(0.0, 0.0)
         self.spawn(pos)
         
         self.image = pg.image.load("media/submarine.png").convert()
@@ -37,13 +37,14 @@ class Sub(object):
         # Convert to floating point (as speeds/normalization won't be integral).
         amt = np.float32(amt)
         # Calculate the vector norm.
-        #norm = fabs(amt.x) + fabs(amt.y)
-        norm = math.sqrt(amt.x ** 2 + amt.y ** 2)
+        norm = np.linalg.norm(amt)
         if norm != 0:
             # Normalize if vector is non-zero.
-            amt /= np.linalg.norm(amt)
+            amt /= norm
+            
             # Modify the position, taking into account the speed of the sub.
-            self.pos += amt * self.speed * time
+            delta = vec2(amt.x * self.speed.x, amt.y * self.speed.y) * time
+            self.pos += delta
     
     def draw(self, offset):
         self.g.screen.blit(self.image, self.pos + offset - self.half_image_size)
