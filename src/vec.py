@@ -3,7 +3,7 @@ import numpy as np
 class vec2(np.ndarray):
     def __new__(cls, data, y=None, type=None):
         if y == None:
-            return np.array(data, dtype=type, copy=False).view(cls)
+            return np.array((data[0], data[1]), dtype=type, copy=False).view(cls)
         else:
             return np.array((data, y), dtype=type, copy=False).view(cls)
     
