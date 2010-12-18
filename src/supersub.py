@@ -72,7 +72,7 @@ def start():
             pings.append(Ping(map, i.mouse.pos + vec2(map.draw_rect.topleft)))
         
         # Create a zero-vector to store the movement direction for the sub.
-        dir = vec2(0.0, 0.0, type=np.float32)
+        dir = vec2(0.0, 0.0)
         
         # Calculate the direction vector based on user input.
         if K_w in i.keys.pressed:
@@ -85,7 +85,7 @@ def start():
             dir += vec2(1.0, 0.0)
         
         # Move the submarine.
-        move_vec = sub.move(time, dir)
+        sub.move(time, dir)
         # If the move is invalid, respawn the dead submarine (for now).
         # TODO: "Kill" the sub, and handle the death (end of match, give a point
         #       and respawn?).        
@@ -99,7 +99,7 @@ def start():
         g.clear()
         
         # Draw the map.
-        #map.draw()
+        map.draw()
         
         # Calculate the drawing offset.
         offset = -1 * vec2(map.draw_rect.topleft)
