@@ -8,6 +8,15 @@ from pygame.locals import *
 from vec import *
 from graphics import *
 
+def value_between(value, range):
+    if range[0] < range[1]:
+        if range[0] <= value <= range[1]:
+            return True
+    elif range[1] <= value <= range[0]:
+        return True
+    
+    return False
+
 def get_line_span(line, axis):
     p1 = np.dot(line.p1, axis)
     p2 = np.dot(line.p2, axis)
@@ -46,9 +55,6 @@ class Line(object):
         
             p1, p2: vec2s (or numpy arrays) representing endpoints of the line. """
         
-        if np.all(p1 == p2):
-            raise Exception("can't create a line with length 0!")
-        
         self.p1 = p1
         self.p2 = p2
         
@@ -60,7 +66,9 @@ class Line(object):
             self.slope = None
         
         self.normal = vec2(-1 * self.vec.y, self.vec.x)
-        self.normal /= np.linalg.norm(self.normal)
+        norm = np.linalg.norm(self.normal)
+        if norm != 0:
+            self.normal /= np.linalg.norm(self.normal)
     
     def draw(self, surface, offset):
         """ Draws the line to the screen. """
@@ -97,6 +105,35 @@ class Line(object):
         if not axis_intersect(rect, self, Line.axis_dir[0]):
             return False
         if not axis_intersect(rect, self, Line.axis_dir[1]):
+            return False
+        
+        return True
+    
+    def project_onto(self, vector):
+        vector /= np.linalg.norm(vector)
+        p1_proj = np.dot(self.p1, vector) * vector
+        p2_proj = np.dot(self.p2, vector) * vector
+        return Line(p1_proj, p2_proj)
+    
+    def intersects_line(self, line):
+        for i in {0, 1}:    #0 is y-axis, 1 is x-axis
+            axis = vec2(i, 1 - i)
+            
+            self_proj = self.project_onto(axis)
+            line_proj = line.project_onto(axis)
+            
+            self_proj_vals = (self_proj.p1[1 - i], self_proj.p2[1 - i])
+            line_proj_vals = (line_proj.p1[1 - i], line_proj.p2[1 - i])
+            
+            if value_between(self_proj_vals[0], line_proj_vals):
+                continue
+            if value_between(self_proj_vals[1], line_proj_vals):
+                continue
+            if value_between(line_proj_vals[0], self_proj_vals):
+                continue
+            if value_between(line_proj_vals[1], self_proj_vals):
+                continue
+            
             return False
         
         return True
