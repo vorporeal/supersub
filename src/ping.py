@@ -26,6 +26,8 @@ class Ping():
     def __render(self, map):
         # Create a new surface which will store the "picture" of this ping.
         self.image = pg.Surface(Ping.side_len_arr, 0, self.g.screen)
+        self.image.fill(pg.Color('magenta'))
+        self.image.set_colorkey(pg.Color('magenta'))
         
         # Draw the ping to the surface.
         map.draw(pg.Rect(self.pos - Ping.radius_arr,
