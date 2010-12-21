@@ -12,6 +12,8 @@ from input import *
 from map import *
 from line import *
 from ping import *
+from manager import *
+from beam import *
 
 WIDTH = 840
 HEIGHT = 840
@@ -29,6 +31,9 @@ def start():
     
     # Create our input handler.
     i = Input()
+    
+    # Create our object manager.
+    m = Manager()
     
     # Create a sub.
     sub = Sub(vec2(320, 240, type=np.float32))
@@ -52,9 +57,6 @@ def start():
     # Define a variable to store the frame times.
     time = 0
     
-    # Define a list to store Ping objects.
-    pings = []
-    
     # A simple event loop.
     while not i.quit:
         # Make sure the input data is up-to-date.
@@ -63,13 +65,18 @@ def start():
         # Get the elapsed time (for calculating movement properly).
         time = clock.get_time() / 1000.0
         
-        # Update all pings.
-        for p in pings:
-            p.update(time)
+        # Update all managed objects.
+        m.update(time)
         
         # Create a new Ping if the mouse was clicked.
+        #if 1 in i.mouse.clicked:
+        #    m.objects.append(Ping(map, i.mouse.pos + vec2(map.draw_rect.topleft)))
+        
         if 1 in i.mouse.clicked:
-            pings.append(Ping(map, i.mouse.pos + vec2(map.draw_rect.topleft)))
+            top_left = vec2(map.draw_rect.topleft)
+            dir = vec2(i.mouse.pos + vec2(map.draw_rect.topleft) - sub.pos)
+            dir /= np.linalg.norm(dir)
+            m.objects.append(Beam(map, sub.pos, dir))
         
         # Create a zero-vector to store the movement direction for the sub.
         dir = vec2(0.0, 0.0)
@@ -99,17 +106,13 @@ def start():
         g.clear()
         
         # Draw the map.
-        map.draw()
+        #map.draw()
         
         # Calculate the drawing offset.
         offset = -1 * vec2(map.draw_rect.topleft)
         
-        # Draw any pings.
-        for p in pings:
-            if p.alpha == 0:
-                pings.remove(p)
-            else:
-                p.draw(offset)
+        # Draw all managed objects
+        m.draw(offset)
         
         # Draw the sub.
         sub.draw(offset)

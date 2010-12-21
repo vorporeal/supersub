@@ -48,6 +48,11 @@ class Ping():
             self.alpha = 0.0
         # Set the surface's alpha.
         self.image.set_alpha(int(self.alpha))
+        
+        if self.alpha == 0:
+            return False
+        
+        return True
     
     def draw(self, offset):
         # If we draw the map, you won't see pings!!!
