@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from math import fabs
+from math import fabs, sqrt
 
 import pygame as pg
 from pygame.locals import *
@@ -64,11 +64,6 @@ class Line(object):
             self.slope = self.vec.y / self.vec.x
         else:
             self.slope = None
-        
-        self.normal = vec2(-1 * self.vec.y, self.vec.x)
-        norm = np.linalg.norm(self.normal)
-        if norm != 0:
-            self.normal /= np.linalg.norm(self.normal)
     
     def draw(self, surface, offset):
         """ Draws the line to the screen. """
@@ -90,7 +85,12 @@ class Line(object):
     def reflect(self, incident):
         """ Reflects a vector off of this line. """
         
-        return incident - 2 * np.dot(self.normal, incident) * self.normal
+        normal = vec2(-1 * self.vec.y, self.vec.x)
+        norm = np.linalg.norm(normal)
+        if norm != 0:
+            normal /= norm
+            
+        return incident - 2 * np.dot(normal, incident) * normal
     
     # TODO: Optimize.  Definitely too slow.
     # May not need to optimize, as if a quad-tree is added, this won't get called
@@ -109,31 +109,34 @@ class Line(object):
         
         return True
     
-    def project_onto(self, vector):
-        vector /= np.linalg.norm(vector)
-        p1_proj = np.dot(self.p1, vector) * vector
-        p2_proj = np.dot(self.p2, vector) * vector
-        return Line(p1_proj, p2_proj)
-    
+    # Nicely optimized.
     def intersects_line(self, line):
-        for i in {0, 1}:    #0 is y-axis, 1 is x-axis
-            axis = vec2(i, 1 - i)
-            
-            self_proj = self.project_onto(axis)
-            line_proj = line.project_onto(axis)
-            
-            self_proj_vals = (self_proj.p1[1 - i], self_proj.p2[1 - i])
-            line_proj_vals = (line_proj.p1[1 - i], line_proj.p2[1 - i])
-            
-            if value_between(self_proj_vals[0], line_proj_vals):
-                continue
-            if value_between(self_proj_vals[1], line_proj_vals):
-                continue
-            if value_between(line_proj_vals[0], self_proj_vals):
-                continue
-            if value_between(line_proj_vals[1], self_proj_vals):
-                continue
-            
+        xflag = False
+        
+        xrange_line = (line.p1.x, line.p2.x)
+        xrange_self = (self.p1.x, self.p2.x)
+        
+        if value_between(self.p1.x, xrange_line):
+            pass
+        elif value_between(self.p2.x, xrange_line):
+            pass
+        elif value_between(line.p1.x, xrange_self):
+            pass
+        elif value_between(line.p2.x, xrange_self):
+            pass
+        else:
             return False
         
-        return True
+        yrange_line = (line.p1.y, line.p2.y)
+        yrange_self = (self.p1.y, self.p2.y)
+        
+        if value_between(self.p1.y, yrange_line):
+            return True
+        elif value_between(self.p2.y, yrange_line):
+            return True
+        elif value_between(line.p1.y, yrange_self):
+            return True
+        elif value_between(line.p2.y, yrange_self):
+            return True
+        else:
+            return False
